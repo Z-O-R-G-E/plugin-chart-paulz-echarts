@@ -37,6 +37,8 @@ export {
   PaulzBigNumberTotalChartPlugin,
 } from './BigNumber';
 export { default as PaulzEchartsSunburstChartPlugin } from './Sunburst';
+export { default as PaulzEchartsBubbleChartPlugin } from './Bubble';
+export { default as PaulzEchartsWaterfallChartPlugin } from './Waterfall';
 
 export { default as BoxPlotTransformProps } from './BoxPlot/transformProps';
 export { default as FunnelTransformProps } from './Funnel/transformProps';
@@ -49,6 +51,8 @@ export { default as TimeseriesTransformProps } from './Timeseries/transformProps
 export { default as TreeTransformProps } from './Tree/transformProps';
 export { default as TreemapTransformProps } from './Treemap/transformProps';
 export { default as SunburstTransformProps } from './Sunburst/transformProps';
+export { default as BubbleTransformProps } from './Bubble/transformProps';
+export { default as WaterfallTransformProps } from './Waterfall/transformProps';
 
 export { DEFAULT_FORM_DATA as TimeseriesDefaultFormData } from './Timeseries/constants';
 

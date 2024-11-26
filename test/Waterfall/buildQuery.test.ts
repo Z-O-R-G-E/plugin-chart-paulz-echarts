@@ -16,22 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parseAxisBound } from '../../src/utils/controls';
+import { SqlaFormData } from '@superset-ui/core';
+import buildQuery from '../../src/Waterfall/buildQuery';
 
-describe('parseYAxisBound', () => {
-  it('should return undefined for invalid values', () => {
-    expect(parseAxisBound(null)).toBeUndefined();
-    expect(parseAxisBound(undefined)).toBeUndefined();
-    expect(parseAxisBound(NaN)).toBeUndefined();
-    expect(parseAxisBound('abc')).toBeUndefined();
-  });
+describe('Waterfall buildQuery', () => {
+  const formData = {
+    datasource: '5__table',
+    granularity_sqla: 'ds',
+    metric: 'foo',
+    x_axis: 'bar',
+    groupby: ['baz'],
+    viz_type: 'waterfall',
+  };
 
-  it('should return numeric value for valid values', () => {
-    expect(parseAxisBound(0)).toEqual(0);
-    expect(parseAxisBound('0')).toEqual(0);
-    expect(parseAxisBound(1)).toEqual(1);
-    expect(parseAxisBound('1')).toEqual(1);
-    expect(parseAxisBound(10.1)).toEqual(10.1);
-    expect(parseAxisBound('10.1')).toEqual(10.1);
+  it('should build query fields from form data', () => {
+    const queryContext = buildQuery(formData as unknown as SqlaFormData);
+    const [query] = queryContext.queries;
+    expect(query.metrics).toEqual(['foo']);
+    expect(query.columns?.[0]).toEqual(
+      expect.objectContaining({ sqlExpression: 'bar' }),
+    );
+    expect(query.columns?.[1]).toEqual('baz');
   });
 });

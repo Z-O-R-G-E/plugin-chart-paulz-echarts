@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parseAxisBound } from '../../src/utils/controls';
+import { NumberFormats } from '@superset-ui/core';
+import { getPercentFormatter } from '../../src/utils/formatters';
 
-describe('parseYAxisBound', () => {
-  it('should return undefined for invalid values', () => {
-    expect(parseAxisBound(null)).toBeUndefined();
-    expect(parseAxisBound(undefined)).toBeUndefined();
-    expect(parseAxisBound(NaN)).toBeUndefined();
-    expect(parseAxisBound('abc')).toBeUndefined();
+describe('getPercentFormatter', () => {
+  const value = 0.6;
+  it('should format as percent if no format is specified', () => {
+    expect(getPercentFormatter().format(value)).toEqual('60%');
   });
-
-  it('should return numeric value for valid values', () => {
-    expect(parseAxisBound(0)).toEqual(0);
-    expect(parseAxisBound('0')).toEqual(0);
-    expect(parseAxisBound(1)).toEqual(1);
-    expect(parseAxisBound('1')).toEqual(1);
-    expect(parseAxisBound(10.1)).toEqual(10.1);
-    expect(parseAxisBound('10.1')).toEqual(10.1);
+  it('should format as percent if SMART_NUMBER is specified', () => {
+    expect(
+      getPercentFormatter(NumberFormats.SMART_NUMBER).format(value),
+    ).toEqual('60%');
+  });
+  it('should format using a provided format', () => {
+    expect(
+      getPercentFormatter(NumberFormats.PERCENT_2_POINT).format(value),
+    ).toEqual('60.00%');
   });
 });

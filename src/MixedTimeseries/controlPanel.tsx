@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { ensureIsArray, hasGenericChartAxes, t } from '@superset-ui/core';
+import { ensureIsArray, t } from '@superset-ui/core';
 import { cloneDeep } from 'lodash';
 import {
   ControlPanelConfig,
@@ -32,7 +32,14 @@ import {
 
 import { DEFAULT_FORM_DATA } from './types';
 import { EchartsTimeseriesSeriesType } from '../Timeseries/types';
-import { legendSection, richTooltipSection } from '../controls';
+import {
+  legendSection,
+  minorTicks,
+  richTooltipSection,
+  truncateXAxis,
+  xAxisBounds,
+  xAxisLabelRotation,
+} from '../controls';
 
 const {
   area,
@@ -49,7 +56,6 @@ const {
   truncateYAxis,
   yAxisBounds,
   zoomable,
-  xAxisLabelRotation,
   yAxisIndex,
 } = DEFAULT_FORM_DATA;
 
@@ -278,14 +284,11 @@ function createAdvancedAnalyticsSection(
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    sections.genericTime,
-    hasGenericChartAxes
-      ? {
-          label: t('Shared query fields'),
-          expanded: true,
-          controlSetRows: [['x_axis'], ['time_grain_sqla']],
-        }
-      : null,
+    {
+      label: t('Shared query fields'),
+      expanded: true,
+      controlSetRows: [['x_axis'], ['time_grain_sqla']],
+    },
     createQuerySection(t('Query A'), ''),
     createAdvancedAnalyticsSection(t('Advanced analytics Query A'), ''),
     createQuerySection(t('Query B'), '_b'),
@@ -311,8 +314,14 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [minorTicks],
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
+        ['x_axis_time_format'],
+        [xAxisLabelRotation],
+        ...richTooltipSection,
+        // eslint-disable-next-line react/jsx-key
+        [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],
         [
           {
             name: 'showXAxisSplitLine',
@@ -373,6 +382,8 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [truncateXAxis],
+        [xAxisBounds],
         [
           {
             name: 'truncateYAxis',

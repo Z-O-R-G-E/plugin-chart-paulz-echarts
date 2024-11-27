@@ -658,6 +658,7 @@ describe('getLegendProps', () => {
         LegendType.Scroll,
         LegendOrientation.Top,
         true,
+        true,
         theme,
         false,
       ),
@@ -677,6 +678,7 @@ describe('getLegendProps', () => {
         LegendType.Scroll,
         LegendOrientation.Top,
         true,
+        true,
         theme,
         true,
       ),
@@ -692,7 +694,13 @@ describe('getLegendProps', () => {
 
   it('should return the correct props for plain type with left orientation', () => {
     expect(
-      getLegendProps(LegendType.Plain, LegendOrientation.Left, true, theme),
+      getLegendProps(
+        LegendType.Plain,
+        LegendOrientation.Left,
+        true,
+        true,
+        theme,
+      ),
     ).toEqual({
       show: true,
       left: 0,
@@ -708,6 +716,7 @@ describe('getLegendProps', () => {
         LegendType.Plain,
         LegendOrientation.Right,
         false,
+        true,
         theme,
         false,
       ),
@@ -727,6 +736,7 @@ describe('getLegendProps', () => {
         LegendType.Plain,
         LegendOrientation.Right,
         false,
+        true,
         theme,
         true,
       ),
@@ -742,7 +752,13 @@ describe('getLegendProps', () => {
 
   it('should return the correct props for plain type with bottom orientation', () => {
     expect(
-      getLegendProps(LegendType.Plain, LegendOrientation.Bottom, false, theme),
+      getLegendProps(
+        LegendType.Plain,
+        LegendOrientation.Bottom,
+        false,
+        true,
+        theme,
+      ),
     ).toEqual({
       show: false,
       bottom: 0,

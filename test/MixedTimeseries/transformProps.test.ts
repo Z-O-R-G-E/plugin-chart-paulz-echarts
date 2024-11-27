@@ -21,7 +21,7 @@ import {
   LegendOrientation,
   LegendType,
   EchartsTimeseriesSeriesType,
-} from '@superset-ui/plugin-chart-echarts';
+} from '@superset-ui/plugin-chart-paulz-echarts';
 import transformProps from '../../src/MixedTimeseries/transformProps';
 import {
   EchartsMixedTimeseriesFormData,
@@ -51,6 +51,7 @@ const formData: EchartsMixedTimeseriesFormData = {
   legendOrientation: LegendOrientation.Top,
   legendType: LegendType.Scroll,
   showLegend: false,
+  showLegendButtons: true,
   showValue: false,
   showValueB: false,
   stack: true,

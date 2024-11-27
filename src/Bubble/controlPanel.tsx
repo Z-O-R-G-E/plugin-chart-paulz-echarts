@@ -132,6 +132,18 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'showXAxisSplitLine',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show X Axis Split Line'),
+              renderTrigger: true,
+              default: true,
+              description: t('Whether to display a split lines for the chart'),
+            },
+          },
+        ],
         [xAxisLabelRotation],
         [
           {
@@ -182,6 +194,18 @@ const config: ControlPanelConfig = {
               label: t('Y Axis Title'),
               renderTrigger: true,
               default: '',
+            },
+          },
+        ],
+        [
+          {
+            name: 'showYAxisSplitLine',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show Y Axis Split Line'),
+              renderTrigger: true,
+              default: true,
+              description: t('Whether to display a split lines for the chart'),
             },
           },
         ],

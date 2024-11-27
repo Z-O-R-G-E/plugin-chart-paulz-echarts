@@ -99,6 +99,8 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     tooltipSizeFormat,
     opacity,
     showLegend,
+    showXAxisSplitLine,
+    showYAxisSplitLine,
     showLegendButtons,
     legendOrientation,
     legendMargin,
@@ -165,6 +167,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     xAxis: {
       axisLabel: { formatter: xAxisFormatter },
       splitLine: {
+        show: showXAxisSplitLine,
         lineStyle: {
           type: 'dashed',
         },
@@ -183,6 +186,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     yAxis: {
       axisLabel: { formatter: yAxisFormatter },
       splitLine: {
+        show: showYAxisSplitLine,
         lineStyle: {
           type: 'dashed',
         },

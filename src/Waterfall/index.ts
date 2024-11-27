@@ -60,7 +60,7 @@ export default class EchartsWaterfallChartPlugin extends ChartPlugin<
           { url: example2 },
           { url: example3 },
         ],
-        name: t('Waterfall Chart'),
+        name: t('Paulz Waterfall Chart'),
         tags: [t('Categorical'), t('Comparison'), t('ECharts'), t('Popular')],
         thumbnail,
       }),

@@ -21,19 +21,32 @@ import {
   CurrencyFormatter,
   ensureIsArray,
   getNumberFormatter,
+  getTimeFormatter,
   isSavedMetric,
+  NumberFormats,
   QueryFormMetric,
+  smartDateDetailedFormatter,
+  smartDateFormatter,
+  TimeFormatter,
   ValueFormatter,
 } from '@superset-ui/core';
+
+export const getPercentFormatter = (format?: string) =>
+  getNumberFormatter(
+    !format || format === NumberFormats.SMART_NUMBER
+      ? NumberFormats.PERCENT
+      : format,
+  );
 
 export const getYAxisFormatter = (
   metrics: QueryFormMetric[],
   forcePercentFormatter: boolean,
   customFormatters: Record<string, ValueFormatter>,
   defaultFormatter: ValueFormatter,
+  format?: string,
 ) => {
   if (forcePercentFormatter) {
-    return getNumberFormatter(',.0%');
+    return getPercentFormatter(format);
   }
   const metricsArray = ensureIsArray(metrics);
   if (
@@ -44,10 +57,34 @@ export const getYAxisFormatter = (
         (formatter, _, formatters) =>
           formatter instanceof CurrencyFormatter &&
           (formatter as CurrencyFormatter)?.currency?.symbol ===
-            (formatters[0] as CurrencyFormatter)?.currency?.symbol,
+          (formatters[0] as CurrencyFormatter)?.currency?.symbol,
       )
   ) {
     return customFormatters[metricsArray[0]];
   }
   return defaultFormatter ?? getNumberFormatter();
 };
+
+export function getTooltipTimeFormatter(
+  format?: string,
+): TimeFormatter | StringConstructor {
+  if (format === smartDateFormatter.id) {
+    return smartDateDetailedFormatter;
+  }
+  if (format) {
+    return getTimeFormatter(format);
+  }
+  return String;
+}
+
+export function getXAxisFormatter(
+  format?: string,
+): TimeFormatter | StringConstructor | undefined {
+  if (format === smartDateFormatter.id || !format) {
+    return undefined;
+  }
+  if (format) {
+    return getTimeFormatter(format);
+  }
+  return String;
+}

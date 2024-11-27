@@ -20,9 +20,13 @@
 import { invert } from 'lodash';
 import {
   AnnotationLayer,
+  AxisType,
+  buildCustomFormatters,
   CategoricalColorNamespace,
+  CurrencyFormatter,
   ensureIsArray,
   GenericDataType,
+  getCustomFormatter,
   getMetricLabel,
   getNumberFormatter,
   getXAxisLabel,
@@ -34,26 +38,24 @@ import {
   isTimeseriesAnnotationLayer,
   t,
   TimeseriesChartDataResponseResult,
-  buildCustomFormatters,
-  getCustomFormatter,
-  CurrencyFormatter,
 } from '@superset-ui/core';
 import {
   extractExtraMetrics,
   getOriginalSeries,
   isDerivedSeries,
+  getTimeOffset,
 } from '@superset-ui/chart-controls';
 import { EChartsCoreOption, SeriesOption } from 'echarts';
-import { ZRLineType } from 'echarts/types/src/util/types';
+import { LineStyleOption } from 'echarts/types/src/util/types';
 import {
   EchartsTimeseriesChartProps,
   EchartsTimeseriesFormData,
-  TimeseriesChartTransformedProps,
   OrientationType,
+  TimeseriesChartTransformedProps,
 } from './types';
 import { DEFAULT_FORM_DATA } from './constants';
 import { ForecastSeriesEnum, ForecastValue, Refs } from '../types';
-import { parseYAxisBound } from '../utils/controls';
+import { parseAxisBound } from '../utils/controls';
 import {
   calculateLowerLogTick,
   dedupSeries,
@@ -63,6 +65,7 @@ import {
   getAxisType,
   getColtypesMapping,
   getLegendProps,
+  getMinAndMaxFromBounds,
 } from '../utils/series';
 import {
   extractAnnotationLabels,
@@ -80,8 +83,6 @@ import { defaultGrid, defaultYAxis } from '../defaults';
 import {
   getBaselineSeriesForStream,
   getPadding,
-  getTooltipTimeFormatter,
-  getXAxisFormatter,
   transformEventAnnotation,
   transformFormulaAnnotation,
   transformIntervalAnnotation,
@@ -90,11 +91,16 @@ import {
 } from './transformers';
 import {
   StackControlsValue,
-  TIMESERIES_CONSTANTS,
   TIMEGRAIN_TO_TIMESTAMP,
+  TIMESERIES_CONSTANTS,
 } from '../constants';
 import { getDefaultTooltip } from '../utils/tooltip';
-import { getYAxisFormatter } from '../utils/getYAxisFormatter';
+import {
+  getPercentFormatter,
+  getTooltipTimeFormatter,
+  getXAxisFormatter,
+  getYAxisFormatter,
+} from '../utils/formatters';
 
 export default function transformProps(
   chartProps: EchartsTimeseriesChartProps,
@@ -142,6 +148,7 @@ export default function transformProps(
     markerSize,
     metrics,
     minorSplitLine,
+    minorTicks,
     onlyTotal,
     opacity,
     orientation,
@@ -159,8 +166,11 @@ export default function transformProps(
     stack,
     tooltipTimeFormat,
     tooltipSortByMetric,
+    truncateXAxis,
     truncateYAxis,
     xAxis: xAxisOrig,
+    xAxisBounds,
+    xAxisForceCategorical,
     xAxisLabelRotation,
     xAxisSortSeries,
     xAxisSortSeriesAscending,
@@ -178,10 +188,10 @@ export default function transformProps(
     zoomable,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
-
+  const groupBy = ensureIsArray(groupby);
   const labelMap = Object.entries(label_map).reduce((acc, entry) => {
     if (
-      entry[1].length > groupby.length &&
+      entry[1].length > groupBy.length &&
       Array.isArray(timeCompare) &&
       timeCompare.includes(entry[1][0])
     ) {
@@ -199,7 +209,7 @@ export default function transformProps(
   ) {
     xAxisLabel = verboseMap[xAxisLabel];
   }
-  const isHorizontal = orientation === OrientationType.horizontal;
+  const isHorizontal = orientation === OrientationType.Horizontal;
   const { totalStackedValues, thresholdValues } = extractDataTotalValues(
     rebasedData,
     {
@@ -213,7 +223,7 @@ export default function transformProps(
     getMetricLabel,
   );
 
-  const isMultiSeries = groupby.length || metrics.length > 1;
+  const isMultiSeries = groupBy.length || metrics?.length > 1;
 
   const [rawSeries, sortedTotalValues, minPositiveValue] = extractSeries(
     rebasedData,
@@ -244,11 +254,11 @@ export default function transformProps(
   const isAreaExpand = stack === StackControlsValue.Expand;
   const xAxisDataType = dataTypes?.[xAxisLabel] ?? dataTypes?.[xAxisOrig];
 
-  const xAxisType = getAxisType(xAxisDataType);
+  const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
 
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
-  const percentFormatter = getNumberFormatter(',.0%');
+  const percentFormatter = getPercentFormatter(yAxisFormat);
   const defaultFormatter = currencyFormat?.symbol
     ? new CurrencyFormatter({ d3Format: yAxisFormat, currency: currencyFormat })
     : getNumberFormatter(yAxisFormat);
@@ -263,10 +273,22 @@ export default function transformProps(
   const array = ensureIsArray(chartProps.rawFormData?.time_compare);
   const inverted = invert(verboseMap);
 
+  const offsetLineWidths = {};
+
   rawSeries.forEach(entry => {
-    const lineStyle = isDerivedSeries(entry, chartProps.rawFormData)
-      ? { type: 'dashed' as ZRLineType }
-      : {};
+    const derivedSeries = isDerivedSeries(entry, chartProps.rawFormData);
+    const lineStyle: LineStyleOption = {};
+    if (derivedSeries) {
+      const offset = getTimeOffset(
+        entry,
+        ensureIsArray(chartProps.rawFormData?.time_compare),
+      )!;
+      if (!offsetLineWidths[offset]) {
+        offsetLineWidths[offset] = Object.keys(offsetLineWidths).length + 1;
+      }
+      lineStyle.type = 'dashed';
+      lineStyle.width = offsetLineWidths[offset];
+    }
 
     const entryName = String(entry.name || '');
     const seriesName = inverted[entryName] || entryName;
@@ -278,6 +300,7 @@ export default function transformProps(
       colorScaleKey,
       {
         area,
+        connectNulls: derivedSeries,
         filterState,
         seriesContexts,
         markerEnabled,
@@ -291,7 +314,7 @@ export default function transformProps(
           : getCustomFormatter(
               customFormatters,
               metrics,
-              labelMap[seriesName]?.[0],
+              labelMap?.[seriesName]?.[0],
             ) ?? defaultFormatter,
         showValue,
         onlyTotal,
@@ -388,23 +411,28 @@ export default function transformProps(
       }
     });
 
-  // yAxisBounds need to be parsed to replace incompatible values with undefined
-  let [min, max] = (yAxisBounds || []).map(parseYAxisBound);
+  // axis bounds need to be parsed to replace incompatible values with undefined
+  const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
+  let [yAxisMin, yAxisMax] = (yAxisBounds || []).map(parseAxisBound);
 
   // default to 0-100% range when doing row-level contribution chart
   if ((contributionMode === 'row' || isAreaExpand) && stack) {
-    if (min === undefined) min = 0;
-    if (max === undefined) max = 1;
-  } else if (logAxis && min === undefined && minPositiveValue !== undefined) {
-    min = calculateLowerLogTick(minPositiveValue);
+    if (yAxisMin === undefined) yAxisMin = 0;
+    if (yAxisMax === undefined) yAxisMax = 1;
+  } else if (
+    logAxis &&
+    yAxisMin === undefined &&
+    minPositiveValue !== undefined
+  ) {
+    yAxisMin = calculateLowerLogTick(minPositiveValue);
   }
 
   const tooltipFormatter =
-    xAxisDataType === GenericDataType.TEMPORAL
+    xAxisDataType === GenericDataType.Temporal
       ? getTooltipTimeFormatter(tooltipTimeFormat)
       : String;
   const xAxisFormatter =
-    xAxisDataType === GenericDataType.TEMPORAL
+    xAxisDataType === GenericDataType.Temporal
       ? getXAxisFormatter(xAxisTimeFormat)
       : String;
 
@@ -427,6 +455,7 @@ export default function transformProps(
     yAxisTitlePosition,
     convertInteger(yAxisTitleMargin),
     convertInteger(xAxisTitleMargin),
+    isHorizontal,
   );
 
   const legendData = rawSeries
@@ -448,20 +477,29 @@ export default function transformProps(
       formatter: xAxisFormatter,
       rotate: xAxisLabelRotation,
     },
+    minorTick: { show: minorTicks },
     splitLine: {
       show: showXAxisSplitLine,
     },
     minInterval:
-      xAxisType === 'time' && timeGrainSqla
+      xAxisType === AxisType.Time && timeGrainSqla
         ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
         : 0,
+    ...getMinAndMaxFromBounds(
+      xAxisType,
+      truncateXAxis,
+      xAxisMin,
+      xAxisMax,
+      seriesType,
+    ),
   };
+
   let yAxis: any = {
     ...defaultYAxis,
-    type: logAxis ? 'log' : 'value',
-    min,
-    max,
-    minorTick: { show: true },
+    type: logAxis ? AxisType.Log : AxisType.Value,
+    min: yAxisMin,
+    max: yAxisMax,
+    minorTick: { show: minorTicks },
     minorSplitLine: { show: minorSplitLine },
     axisLabel: {
       formatter: getYAxisFormatter(
@@ -469,6 +507,7 @@ export default function transformProps(
         forcePercentFormatter,
         customFormatters,
         defaultFormatter,
+        yAxisFormat,
       ),
     },
     splitLine: {
@@ -483,7 +522,6 @@ export default function transformProps(
   if (isHorizontal) {
     [xAxis, yAxis] = [yAxis, xAxis];
     [padding.bottom, padding.left] = [padding.left, padding.bottom];
-    yAxis.inverse = true;
   }
 
   const echartOptions: EChartsCoreOption = {
@@ -521,7 +559,7 @@ export default function transformProps(
           // if there are no dimensions, key is a verbose name of a metric,
           // otherwise it is a comma separated string where the first part is metric name
           const formatterKey =
-            groupby.length === 0 ? inverted[key] : labelMap[key]?.[0];
+            groupBy.length === 0 ? inverted[key] : labelMap[key]?.[0];
           const content = formatForecastTooltipSeries({
             ...value,
             seriesName: key,
@@ -575,6 +613,7 @@ export default function transformProps(
             start: TIMESERIES_CONSTANTS.dataZoomStart,
             end: TIMESERIES_CONSTANTS.dataZoomEnd,
             bottom: TIMESERIES_CONSTANTS.zoomBottom,
+            yAxisIndex: isHorizontal ? 0 : undefined,
           },
         ]
       : [],
@@ -588,7 +627,7 @@ export default function transformProps(
     echartOptions,
     emitCrossFilters,
     formData,
-    groupby,
+    groupby: groupBy,
     height,
     labelMap,
     selectedValues,

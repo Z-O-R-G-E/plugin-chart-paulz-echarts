@@ -99,6 +99,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     tooltipSizeFormat,
     opacity,
     showLegend,
+    showLegendButtons,
     legendOrientation,
     legendMargin,
     legendType,
@@ -199,7 +200,13 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
       type: logYAxis ? AxisType.Log : AxisType.Value,
     },
     legend: {
-      ...getLegendProps(legendType, legendOrientation, showLegend, theme),
+      ...getLegendProps(
+        legendType,
+        legendOrientation,
+        showLegend,
+        showLegendButtons,
+        theme,
+      ),
       data: Array.from(legends),
     },
     tooltip: {

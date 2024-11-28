@@ -180,6 +180,8 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [truncateXAxis],
+        [xAxisBounds],
       ],
     },
     {
@@ -256,8 +258,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        [truncateXAxis],
-        [xAxisBounds],
         [
           {
             name: 'truncateYAxis',

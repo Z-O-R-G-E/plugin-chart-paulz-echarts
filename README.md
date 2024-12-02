@@ -62,7 +62,7 @@ import {
     PaulzEchartsSunburstChartPlugin,
     PaulzEchartsBubbleChartPlugin,
     PaulzEchartsWaterfallChartPlugin,
-} from '@superset-ui/plugin-chart-paulz-echarts';
+} from '@paulz-web/plugin-chart-paulz-echarts';
 ```
 
 чтобы импортировать плагин, а затем добавить следующее в массив, переданный свойству `plugins`:

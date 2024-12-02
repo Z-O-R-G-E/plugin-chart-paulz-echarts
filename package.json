@@ -1,5 +1,5 @@
 {
-  "name": "@superset-ui/plugin-chart-paulz-echarts",
+  "name": "@paulz-web/plugin-chart-paulz-echarts",
   "version": "0.18.25",
   "description": "Superset Chart - Echarts",
   "sideEffects": false,
@@ -25,6 +25,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@paulz-web/plugin-chart-paulz-echarts": "file:",
     "d3-array": "^1.2.0",
     "echarts": "^5.4.1",
     "lodash": "^4.17.15",

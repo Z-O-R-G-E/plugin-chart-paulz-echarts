@@ -17,16 +17,17 @@
  * under the License.
  */
 import { ChartProps, supersetTheme } from '@superset-ui/core';
-import {
-  LegendOrientation,
-  LegendType,
-  EchartsTimeseriesSeriesType,
-} from '@superset-ui/plugin-chart-paulz-echarts';
+
 import transformProps from '../../src/MixedTimeseries/transformProps';
 import {
   EchartsMixedTimeseriesFormData,
   EchartsMixedTimeseriesProps,
 } from '../../src/MixedTimeseries/types';
+import {
+  LegendType,
+  LegendOrientation,
+  EchartsTimeseriesSeriesType,
+} from '../../src/types';
 
 const formData: EchartsMixedTimeseriesFormData = {
   annotationLayers: [],

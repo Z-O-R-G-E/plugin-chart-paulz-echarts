@@ -17,17 +17,17 @@
  * under the License.
  */
 import { AnnotationType, Behavior, t } from '@superset-ui/core';
-import {
-  EchartsTimeseriesChartProps,
-  EchartsTimeseriesFormData,
-} from '@superset-ui/plugin-chart-paulz-echarts';
 import buildQuery from '../buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from '../transformProps';
 import thumbnail from './images/thumbnail.png';
 import example1 from './images/Step1.png';
 import example2 from './images/Step2.png';
-import { EchartsChartPlugin } from '../../types';
+import {
+  EchartsChartPlugin,
+  EchartsTimeseriesChartProps,
+  EchartsTimeseriesFormData,
+} from '../../types';
 
 export default class EchartsTimeseriesStepChartPlugin extends EchartsChartPlugin<
   EchartsTimeseriesFormData,

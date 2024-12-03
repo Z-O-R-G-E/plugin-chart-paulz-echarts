@@ -19,7 +19,7 @@
     "outDir": "lib",
     "pretty": true,
     "removeComments": false,
-//    "strict": true,
+    "strict": true,
     "target": "es2015",
     "useDefineForClassFields": false,
     "composite": true,

@@ -11,9 +11,9 @@ npm run build
 npm run dev
 ```
 
-Чтобы добавить пакет в Superset, перейдите в подкаталог `superset-frontend` в исходной папке Superset (при условии, что плагин `plugin-chart-paulz-echarts` и репозитории `superset` находятся в одном корневом каталоге) и запустите
+Чтобы добавить пакет в Superset, перейдите в подкаталог `superset-frontend` в исходной папке Superset и запустите
 ```
-npm i -S ../../plugin-chart-paulz-table
+npm i -S ./plugins/plugin-chart-paulz-echarts
 ```
 
 Если ваш плагин Superset существует в каталоге `superset-frontend` и вы хотите устранить ошибки TypeScript, связанные с неправильным разрешением `@superset-ui/core`, добавьте следующее в ваш файл `tsconfig.json`:

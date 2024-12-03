@@ -204,9 +204,9 @@ export default function transformProps(
     ? new CurrencyFormatter({ d3Format: yAxisFormat, currency: currencyFormat })
     : getNumberFormatter(yAxisFormat);
 
-  const seriesformatter = (params: ICallbackDataParams) => {
+  const seriesformatter = (params: Partial<ICallbackDataParams>) => {
     const { data } = params;
-    const { originalValue } = data;
+    const originalValue = data?.originalValue;
     return defaultFormatter(originalValue as number);
   };
   const groupbyArray = ensureIsArray(groupby);

@@ -1,7 +1,7 @@
 {
   "name": "@paulz-web/plugin-chart-paulz-echarts",
   "version": "0.18.25",
-  "description": "Superset Chart - Echarts",
+  "description": "Superset Chart - Echarts (Support Superset 4.0.2)",
   "sideEffects": false,
   "main": "lib/index.js",
   "module": "esm/index.js",

@@ -22,6 +22,7 @@ import { cloneDeep } from 'lodash';
 import {
   ControlPanelConfig,
   ControlPanelSectionConfig,
+  ControlSetItem,
   ControlSetRow,
   ControlSubSectionHeader,
   CustomControlItem,
@@ -272,7 +273,7 @@ function createAdvancedAnalyticsSection(
     return aaWithSuffix;
   }
   aaWithSuffix.controlSetRows.forEach(row =>
-    row.forEach((control: CustomControlItem) => {
+    row.forEach((control: Partial<ControlSetItem & CustomControlItem> | null) => {
       if (control?.name) {
         // eslint-disable-next-line no-param-reassign
         control.name = `${control.name}${controlSuffix}`;
